@@ -13,6 +13,7 @@ const presetTemplates = [
   
   { id: '4', name: '科技蓝', preview: '/templates/template_b.png' },
   { id: '5', name: '简约商务', preview: '/templates/template_s.png' },
+  { id: '6', name: '学术报告', preview: '/templates/template_academic.jpg' },
 ];
 
 interface TemplateSelectorProps {
