@@ -540,7 +540,7 @@ class ExportService:
             elem_type = elem.element_type
             
             # 文本类型元素需要提取样式
-            if elem_type in ['text', 'title', 'table_cell']:
+            if elem_type in ['text', 'title', 'table_cell', 'list', 'paragraph', 'header', 'footer', 'heading', 'table_caption', 'image_caption']:
                 if elem.content and elem.image_path and os.path.exists(elem.image_path):
                     text = elem.content.strip()
                     if text:
@@ -631,7 +631,7 @@ class ExportService:
             elem_type = elem.element_type
             
             # 文本类型元素需要提取样式
-            if elem_type in ['text', 'title', 'table_cell']:
+            if elem_type in ['text', 'title', 'table_cell', 'list', 'paragraph', 'header', 'footer', 'heading', 'table_caption', 'image_caption']:
                 if elem.content:
                     text = elem.content.strip()
                     if text:
@@ -847,11 +847,11 @@ class ExportService:
                     image=image_path,
                     text_content=text_content
                 )
-                # 检查是否真正成功（有 colored_segments 或有颜色）
-                if style and (style.colored_segments or style.font_color_rgb != (0, 0, 0)):
+                # 只要 style 不为 None 就算成功（黑色也是有效颜色）
+                if style:
                     return element_id, style, None
                 else:
-                    return element_id, style, "样式为空或默认值"
+                    return element_id, None, "样式提取返回空"
             except Exception as e:
                 logger.warning(f"单个识别失败 [{element_id}]: {e}")
                 return element_id, None, str(e)
@@ -1205,14 +1205,14 @@ class ExportService:
             logger.info(f"{'  ' * depth}  添加元素: type={elem_type}, bbox={bbox_list}, content={elem.content[:30] if elem.content else None}, image_path={elem.image_path}, 使用{'全局' if depth > 0 else '局部'}坐标")
             
             # 根据类型添加元素（参考原实现的_add_mineru_text_to_slide和_add_mineru_image_to_slide）
-            if elem_type in ['text', 'title']:
+            if elem_type in ['text', 'title', 'list', 'paragraph', 'header', 'footer', 'heading', 'table_caption', 'image_caption']:
                 # 添加文本（参考_add_mineru_text_to_slide）
                 if elem.content:
                     text = elem.content.strip()
                     if text:
                         try:
                             # 确定文本级别
-                            level = 'title' if elem_type == 'title' else 'default'
+                            level = 'title' if elem_type in ['title', 'heading'] else 'default'
                             
                             # 从缓存获取预提取的文字样式
                             text_style = text_styles_cache.get(elem.element_id)
